@@ -35,11 +35,8 @@ def check_file_format(file: UploadFile= File(...)):
 @router.post("/", response_model=Task, status_code=status.HTTP_202_ACCEPTED)
 async def postTask(file: UploadFile = Depends(check_file_format), current_user: ModelUser = Depends(get_current_user)):
     """
-    receives ﬁles, and sends a positive response to the consumer as soon as possible. After the response is sent, the system perform the text
+    receives a file, and sends a positive response to the consumer as soon as possible. After the response is sent, the system perform the text
     analysis.
-
-    because the consumer can send multiple files with the same name but different content we save the file on file system with a different name using uuid
-    we use this uuid as the celery custom task id
     """
     id = str(uuid())
 

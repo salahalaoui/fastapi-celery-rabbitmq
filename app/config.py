@@ -56,6 +56,9 @@ class BaseConfig:
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document": WordDocXTextExtractor
     }
 
+    VERSION = "0.1"
+    ADD_DELAY_TASK = int(os.environ.get('ADD_DELAY_TASK', '0'))
+    
 class DevelopmentConfig(BaseConfig):
     pass
 

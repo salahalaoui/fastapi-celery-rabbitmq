@@ -9,6 +9,10 @@ from app.TextAnalysis import analysis
 def create_task(file_location, original_filename, mime_type):
 
     text = settings.ACCEPTED_FILE_TYPES[mime_type](file_location, original_filename).extract_text()
+
+    if settings.ADD_DELAY_TASK:
+        time.sleep(settings.ADD_DELAY_TASK)
+
     output = analysis.text_analysis(text)
 
     return {

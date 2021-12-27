@@ -1,0 +1,44 @@
+from unittest import mock
+
+import requests
+from starlette.types import Scope
+
+from app.models import ModelUser
+
+
+def test_post_login_for_access_token(client, db_session, settings, monkeypatch):
+    mock_requests_post = mock.MagicMock()
+    monkeypatch.setattr(requests, "post", mock_requests_post)
+
+    monkeypatch.setattr(settings, "CELERY_TASK_ALWAYS_EAGER", True, raising=False)
+
+
+    username = "michaelyin"
+    password = "string"
+
+    user = ModelUser(name=username)
+    user.set_password(password)
+    db_session.add(user)
+    db_session.commit()
+    assert user.id == 1
+
+    response = client.post(
+        "/token",
+        data={"username": username, "password": password}
+    )
+    assert response.status_code == 200
+
+    response_data = response.json()
+
+    assert response_data['token_type'] == 'bearer'
+
+
+def test_register(client, db_session, settings, user_factory):
+
+    fake_member = user_factory.build()
+
+    user = ModelUser(name=fake_member.name)
+
+    db_session.add(user)
+    db_session.commit()
+    assert user.id == 1

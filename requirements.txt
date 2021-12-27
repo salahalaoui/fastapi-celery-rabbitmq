@@ -24,12 +24,13 @@ greenlet==1.1.2
 redis==3.5.3
 h11==0.12.0
 watchgod==0.7
-idna==3.3
+idna==2.9
 jwt==1.3.1
 kombu==5.2.2
 flower==1.0.0
 Mako==1.1.6
 MarkupSafe==2.0.1
+requests==2.25.1
 mypy-extensions==0.4.3
 passlib==1.7.4
 pathspec==0.9.0

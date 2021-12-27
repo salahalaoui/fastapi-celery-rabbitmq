@@ -45,3 +45,4 @@ def client(app):
 @pytest.fixture(autouse=True)
 def tmp_upload_dir(tmpdir, settings):
     settings.UPLOADS_DEFAULT_DEST = tmpdir.mkdir("tmp")
+
