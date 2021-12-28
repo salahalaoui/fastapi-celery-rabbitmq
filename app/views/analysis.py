@@ -1,6 +1,6 @@
 import os
 from .auth import get_current_user
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Body, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Body, status, BackgroundTasks
 from fastapi.responses import JSONResponse
 from ..schema import User, TaskResult, Task
 from ..models import ModelUser
@@ -32,33 +32,36 @@ def check_file_format(file: UploadFile= File(...)):
 
     return file
 
-@router.post("/", response_model=Task, status_code=status.HTTP_202_ACCEPTED)
-async def postTask(file: UploadFile = Depends(check_file_format), current_user: ModelUser = Depends(get_current_user)):
-    """
-    receives a file, and sends a positive response to the consumer as soon as possible. After the response is sent, the system perform the text
-    analysis.
-    """
-    id = str(uuid())
 
+def create_celery_task(task_id, file):
     # https://stackoverflow.com/questions/63580229/how-to-save-uploadfile-in-fastapi
     # https://github.com/encode/starlette/issues/446
+
     file_location_full_path = os.path.join(
         settings.UPLOADS_DEFAULT_DEST,
-        f'{id}_{file.filename}'
+        f'{task_id}_{file.filename}'
     )
 
     with open(file_location_full_path, "wb+") as file_object:
         file_object.write(file.file.read())
 
-    task_id = create_task.apply_async(kwargs = {
+    create_task.apply_async(kwargs = {
             "file_location": file_location_full_path,
             "original_filename": file.filename,
             "mime_type": file.content_type
         },
-        task_id=id
+        task_id=task_id
     )
 
-    return Task(task_id=str(task_id))
+@router.post("/", response_model=Task, status_code=status.HTTP_202_ACCEPTED)
+async def postTask(background_tasks: BackgroundTasks, file: UploadFile = Depends(check_file_format), current_user: ModelUser = Depends(get_current_user)):
+    """
+    receives a file, and sends a positive response to the consumer as soon as possible. After the response is sent, the system perform the text
+    analysis.
+    """
+    id = str(uuid())
+    background_tasks.add_task(create_celery_task, task_id=id, file=file)
+    return Task(task_id=id)
 
 async def check_task_exists(task_id: str):
 
