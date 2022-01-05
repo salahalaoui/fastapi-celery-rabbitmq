@@ -1,4 +1,4 @@
-# Lazy Analysis System (LAS) - Challenge
+# Lazy Analysis System (LAS) 
 
 ## Deploy using Docker
 
